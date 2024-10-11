@@ -1,29 +1,23 @@
-'use client'; // This line enables the component to be a client component
+// CustomerList.js
+"use client"; // This line enables the component to be a client component
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Keep this import
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { apiCall } from '../../../lib/api'; // Import the apiCall utility
 
 const CustomerList = ({ onEdit, onRefresh }) => {
   const [customers, setCustomers] = useState([]);
   const router = useRouter(); // Initialize the router
 
-  const fetchCustomers = async () => {
+  const loadCustomers = async () => {
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_BASE);
-      if (!response.ok) {
-        throw new Error('Failed to fetch customers');
-      }
-      return await response.json();
+      const data = await apiCall(process.env.NEXT_PUBLIC_API_BASE);
+      setCustomers(data);
     } catch (error) {
       console.error(error);
       alert(error.message);
     }
-  };
-
-  const loadCustomers = async () => {
-    const data = await fetchCustomers();
-    if (data) setCustomers(data);
   };
 
   useEffect(() => {
@@ -32,13 +26,10 @@ const CustomerList = ({ onEdit, onRefresh }) => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/${id}`, {
+      await apiCall(`${process.env.NEXT_PUBLIC_API_BASE}/${id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete customer');
-      }
       loadCustomers(); // Refresh the customer list after deletion
     } catch (error) {
       console.error(error);
@@ -70,8 +61,8 @@ const CustomerList = ({ onEdit, onRefresh }) => {
               <TableCell>{customer.memberNumber}</TableCell>
               <TableCell>{customer.interests}</TableCell>
               <TableCell>
-                <Button onClick={() => onEdit(customer)}>Edit</Button>
-                <Button onClick={() => handleDelete(customer._id)} color="error">Delete</Button>
+                <Button onClick={(e) => { e.stopPropagation(); onEdit(customer); }}>Edit</Button>
+                <Button onClick={(e) => { e.stopPropagation(); handleDelete(customer._id); }} color="error">Delete</Button>
               </TableCell>
             </TableRow>
           ))}

@@ -1,6 +1,8 @@
+// CustomerForm.js
 "use client";
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
+import { apiCall } from '../../../lib/api'; // Import the apiCall utility
 
 const CustomerForm = ({ customer, onRefresh, onClose }) => {
   const [name, setName] = useState('');
@@ -26,39 +28,21 @@ const CustomerForm = ({ customer, onRefresh, onClose }) => {
     e.preventDefault();
     const customerData = { name, dateOfBirth, memberNumber, interests };
 
+    const url = customer ? `${process.env.NEXT_PUBLIC_API_BASE}/${customer._id}` : process.env.NEXT_PUBLIC_API_BASE;
+    const method = customer ? 'PUT' : 'POST';
+
     try {
-      if (customer) {
-        // Update existing customer
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/${customer._id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(customerData),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to update customer');
-        }
-      } else {
-        // Create new customer
-        const response = await fetch(process.env.NEXT_PUBLIC_API_BASE, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(customerData),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create customer');
-        }
-      }
+      await apiCall(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(customerData),
+      });
 
       onRefresh(); // Callback to refresh the customer list
       onClose(); // Callback to close the form
     } catch (error) {
-      console.error(error);
       alert(error.message); // Show an error message to the user
     }
   };

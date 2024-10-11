@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Typography, Box, CircularProgress } from '@mui/material';
+import { apiCall } from '../../../lib/api'; // Import the apiCall utility
 
 const CustomerDetails = () => {
   const router = useRouter();
@@ -14,11 +15,7 @@ const CustomerDetails = () => {
     const fetchCustomer = async () => {
       if (!id) return; // If ID is not available, return early
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/customers/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch customer');
-        }
-        const data = await response.json();
+        const data = await apiCall(`${process.env.NEXT_PUBLIC_API_BASE}/${id}`);
         setCustomer(data);
       } catch (error) {
         console.error(error);
