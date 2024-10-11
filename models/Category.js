@@ -1,13 +1,18 @@
-import { MoneyOffCsredRounded } from "@mui/icons-material";
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
-  order: Number
+  order: {
+    type: Number,
+    min: 0,  // Optional, ensures that order is non-negative
+  }
 });
+
+// Adding an index on the name field to optimize queries
+categorySchema.index({ name: 1 });
 
 const Category = mongoose.models.category || mongoose.model("category", categorySchema);
 
